@@ -326,7 +326,7 @@
   campos.forEach(function (i) { if (q.get(i)) el[i].value = q.get(i); el[i].addEventListener("input", render); });
   var pedida = q.get("versao") && VERSOES.filter(function (v) { return v.id === q.get("versao") && valida(v); })[0];
   selecionar((pedida || padraoSel).id);
-  document.getElementById("rodapeVersao").textContent = "Gerador v2 · " + VERSOES.length + " versões de assinatura";
+  document.getElementById("rodapeVersao").textContent = "v1.0.0 · " + VERSOES.length + " versões de assinatura";
   window.__gap = { VERSOES: VERSOES, assinatura: assinatura, hospedado: function () { return hospedado; } };
 })();
 </script>
