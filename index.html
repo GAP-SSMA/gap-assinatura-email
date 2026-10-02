@@ -49,6 +49,15 @@
   .versao b { color:#2c3033; display:block; }
   .versao span { font-size:12px; color:#7d8480; }
   .aviso { margin-top:12px; padding:10px 12px; background:#fdf6ea; border-left:3px solid #c2862c; font-size:13px; display:none; }
+  .check-row { display:flex; align-items:flex-start; gap:10px; margin-top:4px; }
+  .check-row input { width:auto; margin:3px 0 0; accent-color:#387251; }
+  .check-row span { font-size:13px; font-weight:normal; color:#4e5153; }
+  .cliente-campos { margin-top:4px; }
+  .cliente-campos.off { display:none; }
+  input[type="file"] { padding:6px 0; border:0; }
+  .logo-prev { margin-top:10px; padding:10px; border:1px dashed #c9d1cc; background:#fafbfa; min-height:52px; display:flex; align-items:center; gap:12px; }
+  .logo-prev img { max-width:140px; max-height:56px; width:auto; height:auto; display:block; }
+  .logo-prev.empty { color:#7d8480; font-size:12px; }
 </style>
 </head>
 <body>
@@ -87,11 +96,28 @@
         </div>
         <div class="hint">Deixe em branco o que não se aplica: a linha some da assinatura.</div>
       </div>
+      <div class="card" style="margin-top:24px;">
+        <h2>3. Trabalho em cliente <span class="opt">(opcional)</span></h2>
+        <label class="check-row">
+          <input type="checkbox" id="clienteAtivo">
+          <span>Usar layout para colaborador alocado em cliente (logo e identifica&ccedil;&atilde;o do parceiro)</span>
+        </label>
+        <div class="cliente-campos off" id="clienteCampos">
+          <label for="clienteEmpresa">Empresa do cliente</label>
+          <input id="clienteEmpresa" placeholder="Razão social ou nome fantasia">
+          <label for="clienteUnidade">Unidade / local <span class="opt">(opcional)</span></label>
+          <input id="clienteUnidade" placeholder="Ex.: Unidade São Paulo, Obra XYZ">
+          <label for="clienteLogo">Logotipo do cliente</label>
+          <input id="clienteLogo" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+          <div class="hint">PNG ou JPG recomendado. O gerador ajusta o tamanho para caber na assinatura (at&eacute; 120&times;48&nbsp;px na visualiza&ccedil;&atilde;o).</div>
+          <div class="logo-prev empty" id="clienteLogoPrev">Nenhum logo carregado.</div>
+        </div>
+      </div>
     </section>
 
     <section>
       <div class="card">
-        <h2>3. Pré-visualização</h2>
+        <h2>4. Pré-visualização</h2>
         <div class="preview-box"><div id="preview"></div></div>
         <div class="actions">
           <button class="btn-primary" id="btnCopiar" type="button">Copiar assinatura</button>
@@ -102,7 +128,7 @@
       </div>
 
       <div class="card steps" style="margin-top:24px;">
-        <h2>4. Como instalar</h2>
+        <h2>5. Como instalar</h2>
         <h3>Outlook para Windows (clássico)</h3>
         <ol>
           <li>Clique em <b>Copiar assinatura</b>.</li>
@@ -174,6 +200,10 @@
     var i = IMAGENS[chave];
     return '<img src="' + esc(src(chave)) + '" width="' + i.w + '" height="' + i.h + '" border="0" alt="' + esc(i.alt) + '" style="display:block;width:' + i.w + 'px;height:' + i.h + 'px;border:0;outline:none;text-decoration:none;' + F + 'font-size:' + (fs || 14) + 'px;font-weight:bold;color:' + (cor || "#387251") + ';">';
   }
+  function imgCliente(c) {
+    return '<img src="' + esc(c.logoSrc) + '" width="' + c.w + '" height="' + c.h + '" border="0" alt="' + esc(c.empresa || "Cliente") + '" style="display:block;width:' + c.w + 'px;height:' + c.h + 'px;border:0;outline:none;text-decoration:none;' + F + '">';
+  }
+  var CLIENTE_LOGO_MAX_W = 120, CLIENTE_LOGO_MAX_H = 48;
 
   // TEMPLATES: função (dados, versão, src) -> HTML. src(chave) devolve a URL da imagem.
   var TEMPLATES = {
@@ -204,6 +234,39 @@
         '<td valign="middle" align="left" style="' + F + 'font-size:11px;mso-line-height-rule:exactly;line-height:16px;color:#4e5153;">Conhe&ccedil;a as plataformas <b style="color:#2c3033;">GEC</b>&reg; e <b style="color:#2c3033;">GEEQUIP</b>&reg; no site da <b style="color:#2c3033;">GAP SISTEMAS</b><br><a href="http://www.sistemasgap.com.br/" style="' + F + 'color:#346b87;text-decoration:underline;">www.sistemasgap.com.br</a></td>' +
         '</tr></table>' +
         '</td></tr></table>';
+    },
+    cliente: function (d, v, src, c) {
+      var top = ['<b style="' + F + 'font-size:15px;line-height:21px;color:#2c3033;">' + esc(d.nome || "Nome Sobrenome") + '</b>'];
+      if (d.cargo) top.push(esc(d.cargo));
+      if (d.email) top.push('<a href="mailto:' + esc(d.email) + '" style="' + F + 'color:#346b87;text-decoration:underline;">' + esc(d.email) + '</a>');
+      if (d.cel) top.push(esc(d.cel));
+      if (d.fixo) top.push(esc(d.fixo) + (d.ramal ? ' &ndash; Ramal ' + esc(d.ramal) : ''));
+      else if (d.ramal) top.push('Ramal ' + esc(d.ramal));
+      top.push('<a href="http://www.gapgestao.com.br/" style="' + F + 'color:#346b87;text-decoration:underline;">www.gapgestao.com.br</a>');
+      var selo = v.selo ? '<td valign="middle" align="left" style="padding:4px 0 0 8px;mso-line-height-rule:at-least;line-height:normal;">' + img(v.selo, src, 10, "#2c3033") + '</td>' : '';
+      var gapCol =
+        '<td valign="top" align="left" style="padding:0 14px 0 0;' + F + 'font-size:12px;mso-line-height-rule:exactly;line-height:18px;color:#4e5153;">' +
+        '<b style="' + F + 'font-size:12px;color:#387251;">Empresa:</b> GAP SSMA<br>' +
+        '<table ' + T + ' style="margin-top:4px;"><tr>' +
+        '<td valign="middle" align="left" style="padding:0;mso-line-height-rule:at-least;line-height:normal;"><a href="http://www.gapgestao.com.br/" style="text-decoration:none;">' + img(v.logo, src) + '</a></td>' + selo +
+        '</tr></table></td>';
+      var clienteTxt = esc(c.empresa);
+      if (c.unidade) clienteTxt += '<br><span style="font-size:11px;color:#7d8480;">' + esc(c.unidade) + '</span>';
+      var clienteCol =
+        '<td valign="top" align="left" style="padding:0 0 0 14px;border-left:2px solid #c9d1cc;' + F + 'font-size:12px;mso-line-height-rule:exactly;line-height:18px;color:#4e5153;">' +
+        '<b style="' + F + 'font-size:12px;color:#4e5153;">A servi&ccedil;o de:</b><br>' + clienteTxt + '<br>' +
+        '<span style="font-size:8px;line-height:8px;">&nbsp;</span><br>' + imgCliente(c) + '</td>';
+      return '' +
+        '<table ' + T + '><tr><td style="padding:0 0 12px 0;' + F + 'font-size:12px;mso-line-height-rule:exactly;line-height:18px;color:#4e5153;">' + top.join('<br>') + '</td></tr>' +
+        '<tr><td style="padding:0 0 12px 0;">' +
+        '<table ' + T + '><tr>' + gapCol + clienteCol + '</tr></table>' +
+        '</td></tr>' +
+        '<tr><td style="padding:10px 0 0 0;border-top:1px solid #e3e8e4;">' +
+        '<table ' + T + '><tr>' +
+        '<td valign="middle" align="left" width="87" style="width:87px;padding:0 10px 0 0;mso-line-height-rule:at-least;line-height:normal;"><a href="http://www.sistemasgap.com.br/" style="text-decoration:none;">' + img("gap_sistemas", src, 11, "#2c3033") + '</a></td>' +
+        '<td valign="middle" align="left" style="' + F + 'font-size:11px;mso-line-height-rule:exactly;line-height:16px;color:#4e5153;">Conhe&ccedil;a as plataformas <b style="color:#2c3033;">GEC</b>&reg; e <b style="color:#2c3033;">GEEQUIP</b>&reg; no site da <b style="color:#2c3033;">GAP SISTEMAS</b><br><a href="http://www.sistemasgap.com.br/" style="' + F + 'color:#346b87;text-decoration:underline;">www.sistemasgap.com.br</a></td>' +
+        '</tr></table>' +
+        '</td></tr></table>';
     }
   };
 
@@ -217,7 +280,39 @@
 
   var campos = ["nome", "cargo", "email", "cel", "fixo", "ramal"], el = {};
   campos.forEach(function (i) { el[i] = document.getElementById(i); });
+  el.clienteAtivo = document.getElementById("clienteAtivo");
+  el.clienteEmpresa = document.getElementById("clienteEmpresa");
+  el.clienteUnidade = document.getElementById("clienteUnidade");
+  el.clienteLogo = document.getElementById("clienteLogo");
+  var clienteCampos = document.getElementById("clienteCampos"), clienteLogoPrev = document.getElementById("clienteLogoPrev");
+  var cliente = { logoSrc: "", w: 0, h: 0 };
   function dados() { var d = {}; campos.forEach(function (i) { d[i] = el[i].value.trim(); }); return d; }
+  function dadosCliente() {
+    return { empresa: el.clienteEmpresa.value.trim(), unidade: el.clienteUnidade.value.trim(), logoSrc: cliente.logoSrc, w: cliente.w, h: cliente.h };
+  }
+  function usaCliente() {
+    return el.clienteAtivo.checked && el.clienteEmpresa.value.trim() && cliente.logoSrc;
+  }
+  function atualizarClienteCampos() { clienteCampos.classList.toggle("off", !el.clienteAtivo.checked); render(); }
+  function mostrarPrevLogo(src) {
+    if (!src) { clienteLogoPrev.className = "logo-prev empty"; clienteLogoPrev.innerHTML = "Nenhum logo carregado."; return; }
+    clienteLogoPrev.className = "logo-prev";
+    clienteLogoPrev.innerHTML = '<img src="' + src + '" alt="Pré-visualização do logo do cliente">';
+  }
+  function encaixarLogo(dataUrl, iw, ih, cb) {
+    var escala = Math.min(1, CLIENTE_LOGO_MAX_W / iw, CLIENTE_LOGO_MAX_H / ih);
+    var w = Math.max(1, Math.round(iw * escala)), h = Math.max(1, Math.round(ih * escala));
+    var canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext("2d");
+    var im = new Image();
+    im.onload = function () {
+      ctx.drawImage(im, 0, 0, w, h);
+      try { cb(canvas.toDataURL("image/png"), w, h); } catch (e) { cb(dataUrl, w, h); }
+    };
+    im.onerror = function () { cb(dataUrl, w, h); };
+    im.src = dataUrl;
+  }
 
   var lista = document.getElementById("versoes"), atual = null;
   var padraoSel = VERSOES.filter(function (v) { return v.destaque && valida(v); })[0] || VERSOES.filter(valida)[0] || VERSOES[0];
@@ -235,13 +330,24 @@
     });
     render();
   }
-  function assinatura(src) { return TEMPLATES[atual.template](dados(), atual, src || srcAtual); }
+  function assinatura(src) {
+    if (usaCliente()) return TEMPLATES.cliente(dados(), atual, src || srcAtual, dadosCliente());
+    return TEMPLATES.colunas(dados(), atual, src || srcAtual);
+  }
   function texto() {
     var d = dados(), t = [d.nome || "Nome Sobrenome"];
     ["cargo", "email", "cel"].forEach(function (i) { if (d[i]) t.push(d[i]); });
-    t.push("", "GAP SSMA");
-    if (d.fixo) t.push(d.fixo + (d.ramal ? " – Ramal " + d.ramal : ""));
-    t.push("www.gapgestao.com.br", "", "Conheça as plataformas GEC® e GEEQUIP® no site da GAP SISTEMAS www.sistemasgap.com.br");
+    if (usaCliente()) {
+      var c = dadosCliente();
+      if (d.fixo) t.push(d.fixo + (d.ramal ? " – Ramal " + d.ramal : ""));
+      else if (d.ramal) t.push("Ramal " + d.ramal);
+      t.push("www.gapgestao.com.br", "", "Empresa: GAP SSMA", "A serviço de: " + c.empresa + (c.unidade ? " – " + c.unidade : ""));
+    } else {
+      t.push("", "GAP SSMA");
+      if (d.fixo) t.push(d.fixo + (d.ramal ? " – Ramal " + d.ramal : ""));
+      t.push("www.gapgestao.com.br");
+    }
+    t.push("", "Conheça as plataformas GEC® e GEEQUIP® no site da GAP SISTEMAS www.sistemasgap.com.br");
     return t.join("\n");
   }
 
@@ -324,10 +430,35 @@
   // Preenchimento opcional via URL: ?versao=padrao&nome=...&cargo=...&email=...&cel=...&fixo=...&ramal=...
   var q = {}; try { q = new URLSearchParams(location.search); } catch (e) { q = { get: function () { return null; } }; }
   campos.forEach(function (i) { if (q.get(i)) el[i].value = q.get(i); el[i].addEventListener("input", render); });
+  if (q.get("cliente_empresa")) el.clienteEmpresa.value = q.get("cliente_empresa");
+  if (q.get("cliente_unidade")) el.clienteUnidade.value = q.get("cliente_unidade");
+  if (q.get("cliente") === "1" || q.get("cliente") === "true") el.clienteAtivo.checked = true;
+  el.clienteAtivo.addEventListener("change", atualizarClienteCampos);
+  el.clienteEmpresa.addEventListener("input", render);
+  el.clienteUnidade.addEventListener("input", render);
+  el.clienteLogo.addEventListener("change", function () {
+    var f = el.clienteLogo.files && el.clienteLogo.files[0];
+    if (!f) { cliente.logoSrc = ""; cliente.w = 0; cliente.h = 0; mostrarPrevLogo(""); render(); return; }
+    if (!/^image\//.test(f.type)) { msg("Selecione um arquivo de imagem (PNG, JPG, etc.).", true); el.clienteLogo.value = ""; return; }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var tmp = new Image();
+      tmp.onload = function () {
+        encaixarLogo(reader.result, tmp.width, tmp.height, function (url, w, h) {
+          cliente.logoSrc = url; cliente.w = w; cliente.h = h;
+          mostrarPrevLogo(url); render();
+        });
+      };
+      tmp.onerror = function () { msg("Não foi possível ler a imagem.", true); };
+      tmp.src = reader.result;
+    };
+    reader.readAsDataURL(f);
+  });
   var pedida = q.get("versao") && VERSOES.filter(function (v) { return v.id === q.get("versao") && valida(v); })[0];
   selecionar((pedida || padraoSel).id);
-  document.getElementById("rodapeVersao").textContent = "v1.0.0 · " + VERSOES.length + " versões de assinatura";
-  window.__gap = { VERSOES: VERSOES, assinatura: assinatura, hospedado: function () { return hospedado; } };
+  atualizarClienteCampos();
+  document.getElementById("rodapeVersao").textContent = "v1.1.0 · " + VERSOES.length + " versões de assinatura";
+  window.__gap = { VERSOES: VERSOES, assinatura: assinatura, usaCliente: usaCliente, hospedado: function () { return hospedado; } };
 })();
 </script>
 </body>
