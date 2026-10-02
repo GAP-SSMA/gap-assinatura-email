@@ -5,7 +5,7 @@
 Ferramenta oficial para criar a assinatura de e-mail padronizada da **GAP SSMA**, pronta para colar no Outlook e no Gmail.
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-online-387251?logo=github&logoColor=white)](https://gap-ssma.github.io/gap-assinatura-email/)
-[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.0.0-346b87)](#changelog)
+[![Versão](https://img.shields.io/badge/vers%C3%A3o-1.1.0-346b87)](#changelog)
 [![Compatível](https://img.shields.io/badge/Outlook%20%7C%20Gmail%20%7C%20Webmail-compat%C3%ADvel-4e5153)](#compatibilidade-com-e-mail)
 
 ### 👉 [Abrir o gerador](https://gap-ssma.github.io/gap-assinatura-email/)
@@ -21,6 +21,7 @@ Ferramenta oficial para criar a assinatura de e-mail padronizada da **GAP SSMA**
 ## Sumário
 
 - [Versões disponíveis](#versões-disponíveis)
+- [Trabalho em cliente](#trabalho-em-cliente)
 - [Como usar](#como-usar)
 - [Instalação no cliente de e-mail](#instalação-no-cliente-de-e-mail)
 - [Como adicionar uma nova versão](#como-adicionar-uma-nova-versão)
@@ -42,14 +43,30 @@ Após o fim da validade, a versão comemorativa aparece como *expirada* e a **Pa
 Link direto para uma versão: [`?versao=18anos`](https://gap-ssma.github.io/gap-assinatura-email/?versao=18anos) ·
 [`?versao=padrao`](https://gap-ssma.github.io/gap-assinatura-email/?versao=padrao)
 
+## Trabalho em cliente
+
+Colaboradores alocados em parceiros podem usar o layout **em cliente**, com identificação da GAP e do cliente na mesma assinatura:
+
+- **Contato** (nome, cargo, e-mail e telefones) no topo.
+- Abaixo, **duas colunas** separadas por linha cinza:
+  - **Empresa: GAP SSMA** + logotipo GAP (e selo GPTW, conforme a versão escolhida).
+  - **A serviço de:** nome do cliente, unidade (opcional) e logotipo enviado pelo colaborador.
+
+O logo do cliente é recortado (margens claras), ajustado (até 150×45 px) e **embutido na assinatura** (não vai para `assets/`). O layout em cliente **não** inclui selo GPTW nem rodapé GAP Sistemas. Use **Baixar logo** se o Outlook ou o Gmail não exibirem a imagem ao colar. Se a opção não estiver marcada ou faltar empresa/logo, a assinatura permanece **igual à versão institucional** (colunas GAP + selo).
+
+![Exemplo de logo para teste](docs/exemplo-logo-cliente.png)
+
+Parâmetros opcionais na URL: `cliente=1`, `cliente_empresa=...`, `cliente_unidade=...` (o logo continua sendo enviado pelo formulário).
+
 ## Como usar
 
 1. Acesse **https://gap-ssma.github.io/gap-assinatura-email/**.
 2. Em **1. Versão**, escolha a assinatura (*GAP 18 anos* ou *Padrão*).
 3. Em **2. Seus dados**, preencha **Nome**, **Cargo**, **E-mail** e **Telefone/Celular**.
    *Telefone fixo e ramal* são opcionais: campos em branco não aparecem na assinatura.
-4. Confira o resultado em **3. Pré-visualização**.
-5. Clique em **Copiar assinatura** e cole no seu cliente de e-mail (veja abaixo).
+4. *(Opcional)* Em **3. Trabalho em cliente**, marque a opção, informe a empresa/unidade e envie o **logotipo do parceiro**.
+5. Confira o resultado em **4. Pré-visualização**.
+6. Clique em **Copiar assinatura** e cole no seu cliente de e-mail (veja abaixo).
    Alternativa para o Outlook clássico: **Baixar .htm**.
 
 ## Instalação no cliente de e-mail
@@ -142,11 +159,18 @@ O texto da assinatura fica sempre visível.
 │   ├── selo_gptw.png   # Selo Great Place to Work 2026–2027
 │   └── gap_sistemas.png# Logotipo GAP Sistemas
 ├── docs/
-│   └── preview.png     # Imagem deste README
+│   ├── preview.png              # Imagem deste README
+│   └── exemplo-logo-cliente.png # Exemplo para testar upload no layout em cliente
 └── .nojekyll           # Publicação direta no GitHub Pages
 ```
 
 ## Changelog
+
+### v1.1.0 · 02/10/2026
+
+- Layout opcional **Trabalho em cliente** (logo e identificação do parceiro).
+- Upload de imagem com ajuste automático de tamanho; logo embutido na assinatura copiada/baixada.
+- Assinatura institucional inalterada quando a opção não é usada.
 
 ### v1.0.0 · 01/10/2026
 
