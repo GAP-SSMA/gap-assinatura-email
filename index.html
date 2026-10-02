@@ -215,7 +215,7 @@
     var w = Math.max(1, Math.round(i.w * escala)), h = Math.max(1, Math.round(i.h * escala));
     return '<img src="' + esc(src(chave)) + '" width="' + w + '" height="' + h + '" border="0" alt="' + esc(i.alt) + '" style="display:block;width:' + w + 'px;height:' + h + 'px;border:0;outline:none;text-decoration:none;' + F + '">';
   }
-  var C_CLIENT = "#1F3864", C_EMAIL_CLIENT = "#3C91B2", C_DIV_CLIENT = "#7F7F7F";
+  var C_CLIENT = "#1F3864", C_CLIENT_BOLD = "#213963", C_EMAIL_CLIENT = "#3C91B2", C_DIV_CLIENT = "#7F7F7F";
   var GAP_LOGO_CLIENT_W = 155, GAP_LOGO_CLIENT_H = 56;
   var CLIENTE_LOGO_MAX_W = 150, CLIENTE_LOGO_MAX_H = 45;
 
@@ -250,7 +250,7 @@
         '</td></tr></table>';
     },
     cliente: function (d, v, src, c) {
-      var top = ['<b style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">' + esc(d.nome || "Nome Sobrenome") + '</b>'];
+      var top = ['<b style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT_BOLD + ';">' + esc(d.nome || "Nome Sobrenome") + '</b>'];
       if (d.cargo) top.push('<span style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">' + esc(d.cargo) + '</span>');
       if (d.email) top.push('<a href="mailto:' + esc(d.email) + '" style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_EMAIL_CLIENT + ';text-decoration:underline;">' + esc(d.email) + '</a>');
       if (d.cel) top.push('<span style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">' + esc(d.cel) + '</span>');
@@ -259,14 +259,14 @@
       var gapCol =
         '<td valign="top" align="left" style="padding:0 14px 0 0;' + F + 'font-size:10pt;mso-line-height-rule:exactly;line-height:14pt;color:' + C_CLIENT + ';">' +
         '<span style="font-size:7pt;line-height:10pt;color:' + C_CLIENT + ';">Empresa:</span><br>' +
-        '<b style="font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';">GAP SSMA</b><br>' +
+        '<b style="font-size:10pt;line-height:14pt;color:' + C_CLIENT_BOLD + ';">GAP SSMA</b><br>' +
         '<a href="http://www.gapgestao.com.br/" style="' + F + 'font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';text-decoration:underline;">www.gapgestao.com.br</a><br>' +
         '<span style="font-size:6px;line-height:6px;">&nbsp;</span><br>' +
         '<a href="http://www.gapgestao.com.br/" style="text-decoration:none;">' + imgGapCliente(v.logo, src) + '</a></td>';
       var clienteCol =
         '<td valign="top" align="left" style="padding:0 0 0 14px;border-left:1.5pt solid ' + C_DIV_CLIENT + ';' + F + 'font-size:10pt;mso-line-height-rule:exactly;line-height:14pt;color:' + C_CLIENT + ';">' +
         '<span style="font-size:7pt;line-height:10pt;color:' + C_CLIENT + ';">A servi&ccedil;o de:</span><br>' +
-        '<b style="font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';">' + esc(c.empresa) + '</b>' +
+        '<b style="font-size:10pt;line-height:14pt;color:' + C_CLIENT_BOLD + ';">' + esc(c.empresa) + '</b>' +
         (c.unidade ? '<br><span style="font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';">' + esc(c.unidade) + '</span>' : '') +
         '<br><span style="font-size:6px;line-height:6px;">&nbsp;</span><br>' + imgCliente(c) + '</td>';
       return '' +
