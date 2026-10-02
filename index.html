@@ -58,6 +58,10 @@
   .logo-prev { margin-top:10px; padding:10px; border:1px dashed #c9d1cc; background:#fafbfa; min-height:52px; display:flex; align-items:center; gap:12px; }
   .logo-prev img { max-width:140px; max-height:56px; width:auto; height:auto; display:block; }
   .logo-prev.empty { color:#7d8480; font-size:12px; }
+  .aviso-cliente { margin-top:12px; padding:10px 12px; background:#fdf6ea; border-left:3px solid #c2862c; font-size:13px; display:none; }
+  .aviso-cliente.on { display:block; }
+  #btnBaixarLogo { display:none; margin-top:10px; }
+  #btnBaixarLogo.on { display:inline-block; }
 </style>
 </head>
 <body>
@@ -109,8 +113,10 @@
           <input id="clienteUnidade" placeholder="Ex.: Unidade São Paulo, Obra XYZ">
           <label for="clienteLogo">Logotipo do cliente</label>
           <input id="clienteLogo" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
-          <div class="hint">PNG ou JPG recomendado. O gerador ajusta o tamanho para caber na assinatura (at&eacute; 120&times;48&nbsp;px na visualiza&ccedil;&atilde;o).</div>
+          <div class="hint">PNG ou JPG recomendado. O gerador recorta margens claras e ajusta o logo (at&eacute; 150&times;45&nbsp;px na assinatura).</div>
           <div class="logo-prev empty" id="clienteLogoPrev">Nenhum logo carregado.</div>
+          <div class="aviso-cliente" id="avisoCliente">No <b>Outlook cl&aacute;ssico</b> e no <b>Gmail</b>, imagens embutidas na c&oacute;pia podem n&atilde;o aparecer. Use <b>Baixar logo</b> e insira a imagem pela ferramenta de imagem do seu e-mail.</div>
+          <button type="button" class="btn-secondary" id="btnBaixarLogo">Baixar logo</button>
         </div>
       </div>
     </section>
@@ -203,7 +209,15 @@
   function imgCliente(c) {
     return '<img src="' + esc(c.logoSrc) + '" width="' + c.w + '" height="' + c.h + '" border="0" alt="' + esc(c.empresa || "Cliente") + '" style="display:block;width:' + c.w + 'px;height:' + c.h + 'px;border:0;outline:none;text-decoration:none;' + F + '">';
   }
-  var CLIENTE_LOGO_MAX_W = 120, CLIENTE_LOGO_MAX_H = 48;
+  function imgGapCliente(chave, src) {
+    var i = IMAGENS[chave];
+    var escala = Math.min(GAP_LOGO_CLIENT_W / i.w, GAP_LOGO_CLIENT_H / i.h);
+    var w = Math.max(1, Math.round(i.w * escala)), h = Math.max(1, Math.round(i.h * escala));
+    return '<img src="' + esc(src(chave)) + '" width="' + w + '" height="' + h + '" border="0" alt="' + esc(i.alt) + '" style="display:block;width:' + w + 'px;height:' + h + 'px;border:0;outline:none;text-decoration:none;' + F + '">';
+  }
+  var C_CLIENT = "#1F3864", C_EMAIL_CLIENT = "#3C91B2", C_DIV_CLIENT = "#7F7F7F";
+  var GAP_LOGO_CLIENT_W = 155, GAP_LOGO_CLIENT_H = 56;
+  var CLIENTE_LOGO_MAX_W = 150, CLIENTE_LOGO_MAX_H = 45;
 
   // TEMPLATES: função (dados, versão, src) -> HTML. src(chave) devolve a URL da imagem.
   var TEMPLATES = {
@@ -236,36 +250,29 @@
         '</td></tr></table>';
     },
     cliente: function (d, v, src, c) {
-      var top = ['<b style="' + F + 'font-size:15px;line-height:21px;color:#2c3033;">' + esc(d.nome || "Nome Sobrenome") + '</b>'];
-      if (d.cargo) top.push(esc(d.cargo));
-      if (d.email) top.push('<a href="mailto:' + esc(d.email) + '" style="' + F + 'color:#346b87;text-decoration:underline;">' + esc(d.email) + '</a>');
-      if (d.cel) top.push(esc(d.cel));
-      if (d.fixo) top.push(esc(d.fixo) + (d.ramal ? ' &ndash; Ramal ' + esc(d.ramal) : ''));
-      else if (d.ramal) top.push('Ramal ' + esc(d.ramal));
-      top.push('<a href="http://www.gapgestao.com.br/" style="' + F + 'color:#346b87;text-decoration:underline;">www.gapgestao.com.br</a>');
-      var selo = v.selo ? '<td valign="middle" align="left" style="padding:4px 0 0 8px;mso-line-height-rule:at-least;line-height:normal;">' + img(v.selo, src, 10, "#2c3033") + '</td>' : '';
+      var top = ['<b style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">' + esc(d.nome || "Nome Sobrenome") + '</b>'];
+      if (d.cargo) top.push('<span style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">' + esc(d.cargo) + '</span>');
+      if (d.email) top.push('<a href="mailto:' + esc(d.email) + '" style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_EMAIL_CLIENT + ';text-decoration:underline;">' + esc(d.email) + '</a>');
+      if (d.cel) top.push('<span style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">' + esc(d.cel) + '</span>');
+      if (d.fixo) top.push('<span style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">' + esc(d.fixo) + (d.ramal ? ' &ndash; Ramal ' + esc(d.ramal) : '') + '</span>');
+      else if (d.ramal) top.push('<span style="' + F + 'font-size:11pt;line-height:15pt;color:' + C_CLIENT + ';">Ramal ' + esc(d.ramal) + '</span>');
       var gapCol =
-        '<td valign="top" align="left" style="padding:0 14px 0 0;' + F + 'font-size:12px;mso-line-height-rule:exactly;line-height:18px;color:#4e5153;">' +
-        '<b style="' + F + 'font-size:12px;color:#387251;">Empresa:</b> GAP SSMA<br>' +
-        '<table ' + T + ' style="margin-top:4px;"><tr>' +
-        '<td valign="middle" align="left" style="padding:0;mso-line-height-rule:at-least;line-height:normal;"><a href="http://www.gapgestao.com.br/" style="text-decoration:none;">' + img(v.logo, src) + '</a></td>' + selo +
-        '</tr></table></td>';
-      var clienteTxt = esc(c.empresa);
-      if (c.unidade) clienteTxt += '<br><span style="font-size:11px;color:#7d8480;">' + esc(c.unidade) + '</span>';
+        '<td valign="top" align="left" style="padding:0 14px 0 0;' + F + 'font-size:10pt;mso-line-height-rule:exactly;line-height:14pt;color:' + C_CLIENT + ';">' +
+        '<span style="font-size:7pt;line-height:10pt;color:' + C_CLIENT + ';">Empresa:</span><br>' +
+        '<b style="font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';">GAP SSMA</b><br>' +
+        '<a href="http://www.gapgestao.com.br/" style="' + F + 'font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';text-decoration:underline;">www.gapgestao.com.br</a><br>' +
+        '<span style="font-size:6px;line-height:6px;">&nbsp;</span><br>' +
+        '<a href="http://www.gapgestao.com.br/" style="text-decoration:none;">' + imgGapCliente(v.logo, src) + '</a></td>';
       var clienteCol =
-        '<td valign="top" align="left" style="padding:0 0 0 14px;border-left:2px solid #c9d1cc;' + F + 'font-size:12px;mso-line-height-rule:exactly;line-height:18px;color:#4e5153;">' +
-        '<b style="' + F + 'font-size:12px;color:#4e5153;">A servi&ccedil;o de:</b><br>' + clienteTxt + '<br>' +
-        '<span style="font-size:8px;line-height:8px;">&nbsp;</span><br>' + imgCliente(c) + '</td>';
+        '<td valign="top" align="left" style="padding:0 0 0 14px;border-left:1.5pt solid ' + C_DIV_CLIENT + ';' + F + 'font-size:10pt;mso-line-height-rule:exactly;line-height:14pt;color:' + C_CLIENT + ';">' +
+        '<span style="font-size:7pt;line-height:10pt;color:' + C_CLIENT + ';">A servi&ccedil;o de:</span><br>' +
+        '<b style="font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';">' + esc(c.empresa) + '</b>' +
+        (c.unidade ? '<br><span style="font-size:10pt;line-height:14pt;color:' + C_CLIENT + ';">' + esc(c.unidade) + '</span>' : '') +
+        '<br><span style="font-size:6px;line-height:6px;">&nbsp;</span><br>' + imgCliente(c) + '</td>';
       return '' +
-        '<table ' + T + '><tr><td style="padding:0 0 12px 0;' + F + 'font-size:12px;mso-line-height-rule:exactly;line-height:18px;color:#4e5153;">' + top.join('<br>') + '</td></tr>' +
-        '<tr><td style="padding:0 0 12px 0;">' +
+        '<table ' + T + '><tr><td style="padding:0 0 10px 0;' + F + 'mso-line-height-rule:exactly;line-height:15pt;color:' + C_CLIENT + ';">' + top.join('<br>') + '</td></tr>' +
+        '<tr><td style="padding:0;">' +
         '<table ' + T + '><tr>' + gapCol + clienteCol + '</tr></table>' +
-        '</td></tr>' +
-        '<tr><td style="padding:10px 0 0 0;border-top:1px solid #e3e8e4;">' +
-        '<table ' + T + '><tr>' +
-        '<td valign="middle" align="left" width="87" style="width:87px;padding:0 10px 0 0;mso-line-height-rule:at-least;line-height:normal;"><a href="http://www.sistemasgap.com.br/" style="text-decoration:none;">' + img("gap_sistemas", src, 11, "#2c3033") + '</a></td>' +
-        '<td valign="middle" align="left" style="' + F + 'font-size:11px;mso-line-height-rule:exactly;line-height:16px;color:#4e5153;">Conhe&ccedil;a as plataformas <b style="color:#2c3033;">GEC</b>&reg; e <b style="color:#2c3033;">GEEQUIP</b>&reg; no site da <b style="color:#2c3033;">GAP SISTEMAS</b><br><a href="http://www.sistemasgap.com.br/" style="' + F + 'color:#346b87;text-decoration:underline;">www.sistemasgap.com.br</a></td>' +
-        '</tr></table>' +
         '</td></tr></table>';
     }
   };
@@ -285,7 +292,8 @@
   el.clienteUnidade = document.getElementById("clienteUnidade");
   el.clienteLogo = document.getElementById("clienteLogo");
   var clienteCampos = document.getElementById("clienteCampos"), clienteLogoPrev = document.getElementById("clienteLogoPrev");
-  var cliente = { logoSrc: "", w: 0, h: 0 };
+  var avisoCliente = document.getElementById("avisoCliente"), btnBaixarLogo = document.getElementById("btnBaixarLogo");
+  var cliente = { logoSrc: "", w: 0, h: 0, rawBytes: null };
   function dados() { var d = {}; campos.forEach(function (i) { d[i] = el[i].value.trim(); }); return d; }
   function dadosCliente() {
     return { empresa: el.clienteEmpresa.value.trim(), unidade: el.clienteUnidade.value.trim(), logoSrc: cliente.logoSrc, w: cliente.w, h: cliente.h };
@@ -299,19 +307,53 @@
     clienteLogoPrev.className = "logo-prev";
     clienteLogoPrev.innerHTML = '<img src="' + src + '" alt="Pré-visualização do logo do cliente">';
   }
-  function encaixarLogo(dataUrl, iw, ih, cb) {
-    var escala = Math.min(1, CLIENTE_LOGO_MAX_W / iw, CLIENTE_LOGO_MAX_H / ih);
-    var w = Math.max(1, Math.round(iw * escala)), h = Math.max(1, Math.round(ih * escala));
-    var canvas = document.createElement("canvas");
-    canvas.width = w; canvas.height = h;
-    var ctx = canvas.getContext("2d");
+  function apararLogo(dataUrl, cb) {
     var im = new Image();
     im.onload = function () {
-      ctx.drawImage(im, 0, 0, w, h);
-      try { cb(canvas.toDataURL("image/png"), w, h); } catch (e) { cb(dataUrl, w, h); }
+      var full = document.createElement("canvas");
+      full.width = im.width; full.height = im.height;
+      var fctx = full.getContext("2d");
+      fctx.drawImage(im, 0, 0);
+      var id = fctx.getImageData(0, 0, full.width, full.height), px = id.data, W = full.width, H = full.height;
+      var minX = W, minY = H, maxX = -1, maxY = -1, x, y, i, r, g, b, a;
+      for (y = 0; y < H; y++) {
+        for (x = 0; x < W; x++) {
+          i = (y * W + x) * 4; r = px[i]; g = px[i + 1]; b = px[i + 2]; a = px[i + 3];
+          if (a < 20) continue;
+          if (r > 248 && g > 248 && b > 248) continue;
+          if (minX > x) minX = x; if (minY > y) minY = y; if (maxX < x) maxX = x; if (maxY < y) maxY = y;
+        }
+      }
+      if (maxX < minX) { cb(dataUrl, im.width, im.height); return; }
+      var tw = maxX - minX + 1, th = maxY - minY + 1;
+      var crop = document.createElement("canvas");
+      crop.width = tw; crop.height = th;
+      crop.getContext("2d").drawImage(full, minX, minY, tw, th, 0, 0, tw, th);
+      try { cb(crop.toDataURL("image/png"), tw, th); } catch (e) { cb(dataUrl, im.width, im.height); }
     };
-    im.onerror = function () { cb(dataUrl, w, h); };
+    im.onerror = function () { cb(dataUrl, 1, 1); };
     im.src = dataUrl;
+  }
+  function encaixarLogo(dataUrl, iw, ih, cb) {
+    apararLogo(dataUrl, function (aparado, aw, ah) {
+      var escala = Math.min(1, CLIENTE_LOGO_MAX_W / aw, CLIENTE_LOGO_MAX_H / ah);
+      var w = Math.max(1, Math.round(aw * escala)), h = Math.max(1, Math.round(ah * escala));
+      var canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext("2d");
+      var im = new Image();
+      im.onload = function () {
+        ctx.drawImage(im, 0, 0, w, h);
+        try { cb(canvas.toDataURL("image/png"), w, h); } catch (e) { cb(aparado, w, h); }
+      };
+      im.onerror = function () { cb(aparado, w, h); };
+      im.src = aparado;
+    });
+  }
+  function atualizarAvisoCliente() {
+    var tem = el.clienteAtivo.checked && !!cliente.logoSrc;
+    avisoCliente.classList.toggle("on", tem);
+    btnBaixarLogo.classList.toggle("on", tem);
   }
 
   var lista = document.getElementById("versoes"), atual = null;
@@ -341,18 +383,17 @@
       var c = dadosCliente();
       if (d.fixo) t.push(d.fixo + (d.ramal ? " – Ramal " + d.ramal : ""));
       else if (d.ramal) t.push("Ramal " + d.ramal);
-      t.push("www.gapgestao.com.br", "", "Empresa: GAP SSMA", "A serviço de: " + c.empresa + (c.unidade ? " – " + c.unidade : ""));
-    } else {
-      t.push("", "GAP SSMA");
-      if (d.fixo) t.push(d.fixo + (d.ramal ? " – Ramal " + d.ramal : ""));
-      t.push("www.gapgestao.com.br");
+      t.push("", "Empresa: GAP SSMA", "www.gapgestao.com.br", "A serviço de: " + c.empresa + (c.unidade ? " – " + c.unidade : ""));
+      return t.join("\n");
     }
-    t.push("", "Conheça as plataformas GEC® e GEEQUIP® no site da GAP SISTEMAS www.sistemasgap.com.br");
+    t.push("", "GAP SSMA");
+    if (d.fixo) t.push(d.fixo + (d.ramal ? " – Ramal " + d.ramal : ""));
+    t.push("www.gapgestao.com.br", "", "Conheça as plataformas GEC® e GEEQUIP® no site da GAP SISTEMAS www.sistemasgap.com.br");
     return t.join("\n");
   }
 
   var preview = document.getElementById("preview"), status = document.getElementById("status"), aviso = document.getElementById("aviso");
-  function render() { if (atual) preview.innerHTML = assinatura(); }
+  function render() { if (atual) preview.innerHTML = assinatura(); atualizarAvisoCliente(); }
   function msg(t, err) { status.textContent = t; status.className = err ? "err" : ""; if (!err) setTimeout(function () { if (status.textContent === t) status.textContent = ""; }, 5000); }
   function validaCampos() { if (!el.nome.value.trim() || !el.email.value.trim()) { msg("Preencha pelo menos Nome e E-mail.", true); return false; } return true; }
   function docHtml(corpo) { return '<!DOCTYPE html>\n<html lang="pt-BR"><head><meta charset="utf-8"><title>Assinatura GAP</title></head><body>' + corpo + '</body></html>'; }
@@ -438,7 +479,7 @@
   el.clienteUnidade.addEventListener("input", render);
   el.clienteLogo.addEventListener("change", function () {
     var f = el.clienteLogo.files && el.clienteLogo.files[0];
-    if (!f) { cliente.logoSrc = ""; cliente.w = 0; cliente.h = 0; mostrarPrevLogo(""); render(); return; }
+    if (!f) { cliente.logoSrc = ""; cliente.w = 0; cliente.h = 0; cliente.rawBytes = null; mostrarPrevLogo(""); render(); return; }
     if (!/^image\//.test(f.type)) { msg("Selecione um arquivo de imagem (PNG, JPG, etc.).", true); el.clienteLogo.value = ""; return; }
     var reader = new FileReader();
     reader.onload = function () {
@@ -446,6 +487,7 @@
       tmp.onload = function () {
         encaixarLogo(reader.result, tmp.width, tmp.height, function (url, w, h) {
           cliente.logoSrc = url; cliente.w = w; cliente.h = h;
+          try { cliente.rawBytes = b64bytes(url); } catch (e) { cliente.rawBytes = null; }
           mostrarPrevLogo(url); render();
         });
       };
@@ -453,6 +495,14 @@
       tmp.src = reader.result;
     };
     reader.readAsDataURL(f);
+  });
+  btnBaixarLogo.addEventListener("click", function () {
+    if (!cliente.logoSrc) return;
+    var base = el.clienteEmpresa.value.trim() || "logo-cliente";
+    var nome = base.replace(/[^\w\u00C0-\u024f\-]+/gi, "_").replace(/_+/g, "_") + ".png";
+    if (cliente.rawBytes) baixar(nome, new Blob([cliente.rawBytes], { type: "image/png" }));
+    else baixar(nome, new Blob([b64bytes(cliente.logoSrc)], { type: "image/png" }));
+    msg("Logo baixado: " + nome);
   });
   var pedida = q.get("versao") && VERSOES.filter(function (v) { return v.id === q.get("versao") && valida(v); })[0];
   selecionar((pedida || padraoSel).id);

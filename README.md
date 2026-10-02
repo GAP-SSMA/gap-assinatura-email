@@ -52,7 +52,7 @@ Colaboradores alocados em parceiros podem usar o layout **em cliente**, com iden
   - **Empresa: GAP SSMA** + logotipo GAP (e selo GPTW, conforme a versão escolhida).
   - **A serviço de:** nome do cliente, unidade (opcional) e logotipo enviado pelo colaborador.
 
-O logo do cliente é ajustado automaticamente (até 120×48 px na visualização) e **embutido na assinatura** (não vai para `assets/`). Se a opção não estiver marcada ou faltar empresa/logo, a assinatura permanece **igual à versão institucional** (colunas GAP + selo).
+O logo do cliente é recortado (margens claras), ajustado (até 150×45 px) e **embutido na assinatura** (não vai para `assets/`). O layout em cliente **não** inclui selo GPTW nem rodapé GAP Sistemas. Use **Baixar logo** se o Outlook ou o Gmail não exibirem a imagem ao colar. Se a opção não estiver marcada ou faltar empresa/logo, a assinatura permanece **igual à versão institucional** (colunas GAP + selo).
 
 ![Exemplo de logo para teste](docs/exemplo-logo-cliente.png)
 
